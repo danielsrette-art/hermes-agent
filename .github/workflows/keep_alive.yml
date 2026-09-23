@@ -1,29 +1,28 @@
-name: Codespace 24/7 Keep Alive & Docker Gateway Monitor
+name: Codespace 24/7 Keep Alive
 
 on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর ব্যাকগ্রাউন্ডে রান হবে
+    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর রান হবে
   workflow_dispatch: 
 
 jobs:
-  manage-codespace:
+  ping-codespace:
     runs-on: ubuntu-latest
     
+    # গিটহাব অ্যাকশন বটকে কোডস্পেস পরিচালনার অফিশিয়াল পারমিশন দেওয়া হলো
     permissions:
       contents: write
       codespaces: write
 
     steps:
-      - name: Force Resume Codespace Container
+      - name: Wake up Codespace via CLI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
+          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq" 
         run: |
-          echo "🔄 Keeping Docker Container Awake..."
-          gh api -X POST /user/codespaces/$CODESPACE_NAME/start || echo "Already running."
-          
-          echo "🌐 Ping Endpoint..."
-          curl -sL -o /dev/null https://github.dev
-          echo "✅ Keep-alive loop completed."
+          echo "🔄 Official CLI resume signal sending..."
+          # এটি ইন্টারনাল এপিআই বাইপাস করে সরাসরি কোডস্পেস স্টার্ট করার অফিশিয়াল কমান্ড
+          gh codespace resume --name "$CODESPACE_NAME"
+          echo "✅ Codespace Docker container is awake and running!"
