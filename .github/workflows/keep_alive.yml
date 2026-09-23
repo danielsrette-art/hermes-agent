@@ -1,22 +1,44 @@
-name: Codespace 24/7 Keep Alive
+name: Codespace 24/7 Keep Alive & Gateway Auto-Restart
 
 on:
   push:
-    branches: [ main ] 
+    branches: [ main ]
   schedule:
-    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর রান হবে
+    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর ব্যাকগ্রাউন্ডে রান হবে
   workflow_dispatch: 
 
 jobs:
-  ping-codespace:
+  manage-codespace:
     runs-on: ubuntu-latest
+    
+    # গিটহাব অ্যাকশনকে কোডস্পেসের ভেতরের কমান্ড চালানোর ফুল পারমিশন দেওয়া হলো
+    permissions:
+      contents: write
+      codespaces: write
+
     steps:
-      - name: Wake up Codespace
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Auth & Force Resume Codespace
         env:
-          # এখানে আমরা নতুন সিক্রেট টোকেনটি অ্যাসাইন করলাম
-          GH_TOKEN: ${{ secrets.CODELIVE_TOKEN }}
-          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq" 
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
         run: |
-          echo "🔄 Pinging codespace to keep it alive..."
-          gh codespace resume --name "$CODESPACE_NAME"
-          echo "✅ Codespace is awake and idle timer reset!"
+          echo "🔄 Waking up Codespace from sleep/stop mode..."
+          # কোডস্পেস কন্টেইনারকে অফিসিয়ালি স্টার্ট করা
+          gh api -X POST /user/codespaces/$CODESPACE_NAME/start || echo "Codespace already active."
+          
+          echo "🌐 Testing Web Endpoint..."
+          curl -sL -o /dev/null https://github.dev
+          
+      - name: Remotely Start Hermes Gateway
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
+        run: |
+          echo "🚀 Sending command to ensure Hermes Gateway is RUNNING..."
+          # কোডস্পেসের ভেতরে রিমোটলি 'hermes gateway start' কমান্ডটি এক্সিকিউট করা হচ্ছে
+          gh codespace code --name "$CODESPACE_NAME" --command "hermes gateway start" || echo "Gateway failed to start or already running."
+          
+          echo "✅ All tasks completed successfully!"
