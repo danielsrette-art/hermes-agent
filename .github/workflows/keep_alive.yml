@@ -1,4 +1,4 @@
-name: Codespace 24/7 Keep Alive & Gateway Auto-Restart
+name: Codespace 24/7 Keep Alive & Docker Gateway Monitor
 
 on:
   push:
@@ -11,34 +11,19 @@ jobs:
   manage-codespace:
     runs-on: ubuntu-latest
     
-    # গিটহাব অ্যাকশনকে কোডস্পেসের ভেতরের কমান্ড চালানোর ফুল পারমিশন দেওয়া হলো
     permissions:
       contents: write
       codespaces: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Auth & Force Resume Codespace
+      - name: Force Resume Codespace Container
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
         run: |
-          echo "🔄 Waking up Codespace from sleep/stop mode..."
-          # কোডস্পেস কন্টেইনারকে অফিসিয়ালি স্টার্ট করা
-          gh api -X POST /user/codespaces/$CODESPACE_NAME/start || echo "Codespace already active."
+          echo "🔄 Keeping Docker Container Awake..."
+          gh api -X POST /user/codespaces/$CODESPACE_NAME/start || echo "Already running."
           
-          echo "🌐 Testing Web Endpoint..."
+          echo "🌐 Ping Endpoint..."
           curl -sL -o /dev/null https://github.dev
-          
-      - name: Remotely Start Hermes Gateway
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
-        run: |
-          echo "🚀 Sending command to ensure Hermes Gateway is RUNNING..."
-          # কোডস্পেসের ভেতরে রিমোটলি 'hermes gateway start' কমান্ডটি এক্সিকিউট করা হচ্ছে
-          gh codespace code --name "$CODESPACE_NAME" --command "hermes gateway start" || echo "Gateway failed to start or already running."
-          
-          echo "✅ All tasks completed successfully!"
+          echo "✅ Keep-alive loop completed."
