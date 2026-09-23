@@ -1,0 +1,22 @@
+cat << 'EOF' > .github/workflows/keep_alive.yml
+name: Codespace 24/7 Keep Alive
+
+on:
+  schedule:
+    # প্রতি ১ ঘণ্টা পর পর স্বয়ংক্রিয়ভাবে রান হবে
+    - cron: '0 * * * *'
+  workflow_dispatch: # ম্যানুয়ালি রান করার অপশন
+
+jobs:
+  ping-codespace:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake up Codespace
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq" 
+        run: |
+          echo "🔄 Pinging codespace to keep it alive..."
+          gh codespace resume --name "$CODESPACE_NAME"
+          echo "✅ Codespace is awake and idle timer reset!"
+EOF
