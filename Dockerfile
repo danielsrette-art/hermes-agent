@@ -1,10 +1,11 @@
+# অফিশিয়াল ডকার ইমেজ
 FROM nousresearch/hermes-agent:latest
 
-# আপনার কোডস্পেসের ব্যাকআপ (যার মধ্যে পোর্টাল লগইন সেশন আছে) কপি করা হচ্ছে
-COPY ./hermes_backup /root/.hermes
+# ডকার ইমেজের অফিশিয়াল ইন্টারনাল ডেটা পাথে কোডস্পেসের ব্যাকআপ কপি করা হচ্ছে
+COPY ./hermes_backup /opt/data
 
-# ডিরেক্টরি পাথ সেট করা হচ্ছে
-ENV HERMES_HOME=/root/.hermes
+# হার্মিসকে ডকার ডিরেক্টরি পাথ চিনিয়ে দেওয়া
+ENV HERMES_HOME=/opt/data
 
-# পোর্টাল এবং গেটওয়ে একসাথে ২৪/৭ রান করার কমান্ড
+# পোর্টাল লুপসহ গেটওয়ে রান করার কমান্ড
 CMD ["hermes", "gateway", "run", "--portal"]
