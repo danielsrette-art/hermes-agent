@@ -2,26 +2,18 @@ name: Codespace 24/7 Keep Alive
 
 on:
   push:
-    branches: [ main ] 
+    branches: [ main ]
   schedule:
-    - cron: '15 * * * *' 
-  workflow_dispatch: 
+    - cron: '15 * * * *'
+  workflow_dispatch:
 
 jobs:
-  ping-codespace:
+  web-ping:
     runs-on: ubuntu-latest
-    
-    # এটি গিটহাব অ্যাকশনকে কোডস্পেস ম্যানেজ করার জন্য ফুল পারমিশন দেবে
-    permissions:
-      contents: write
-      codespaces: write
-
     steps:
-      - name: Wake up Codespace
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq" 
+      - name: Hit Codespace URL
         run: |
-          echo "🔄 Pinging codespace to keep it alive..."
-          gh codespace resume --name "$CODESPACE_NAME"
-          echo "✅ Codespace is awake and idle timer reset!"
+          echo "🌐 Pinging Codespace Endpoint..."
+          # -L ফ্ল্যাগ যোগ করার ফলে রিডাইরেক্ট হলেও স্ক্রিপ্টটি সফলভাবে রান হবে
+          curl -sL -o /dev/null https://legendary-robot-p7p74pv59vvxh4vq.github.dev/
+          echo "✅ Wake-up signal sent successfully!"
