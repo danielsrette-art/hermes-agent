@@ -2,14 +2,20 @@ name: Codespace 24/7 Keep Alive
 
 on:
   push:
-    branches: [ main ] # এই লাইনটি যোগ করার ফলে পুশ করলেই অ্যাকশনটি চালু হয়ে যাবে
+    branches: [ main ] 
   schedule:
-    - cron: '15 * * * *' # টপ-আওয়ার ট্রাফিক জ্যাম এড়াতে ১৫ মিনিটে সেট করা হলো
+    - cron: '15 * * * *' 
   workflow_dispatch: 
 
 jobs:
   ping-codespace:
     runs-on: ubuntu-latest
+    
+    # এটি গিটহাব অ্যাকশনকে কোডস্পেস ম্যানেজ করার জন্য ফুল পারমিশন দেবে
+    permissions:
+      contents: write
+      codespaces: write
+
     steps:
       - name: Wake up Codespace
         env:
