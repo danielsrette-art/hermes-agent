@@ -2,25 +2,21 @@ name: Codespace 24/7 Keep Alive
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ] 
   schedule:
     - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর রান হবে
-  workflow_dispatch:
+  workflow_dispatch: 
 
 jobs:
-  wake-codespace:
+  ping-codespace:
     runs-on: ubuntu-latest
     steps:
-      - name: Wake up via GitHub CLI
+      - name: Wake up Codespace
         env:
-          # গিটহাবের নিজস্ব বিল্ট-ইন টোকেন যা সিকিউরড
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
+          # এখানে আমরা নতুন সিক্রেট টোকেনটি অ্যাসাইন করলাম
+          GH_TOKEN: ${{ secrets.CODELIVE_TOKEN }}
+          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq" 
         run: |
-          echo "🔄 Sending official resume command to codespace..."
-          # এই স্পেসিফিক এপিআই কলটি সরাসরি কোডস্পেস কন্টেইনারকে ওয়েক-আপ করে
-          gh api -X POST /user/codespaces/$CODESPACE_NAME/start || echo "Already running or login required"
-          
-          # সেফটি হিসেবে ওয়েব এন্ডপয়েন্টেও একটা হিট পাঠানো হচ্ছে
-          curl -sL -o /dev/null https://github.dev
-          echo "✅ Keep-alive triggers completed."
+          echo "🔄 Pinging codespace to keep it alive..."
+          gh codespace resume --name "$CODESPACE_NAME"
+          echo "✅ Codespace is awake and idle timer reset!"
