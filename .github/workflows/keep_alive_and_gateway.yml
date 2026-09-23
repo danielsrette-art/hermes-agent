@@ -1,0 +1,52 @@
+name: Keep-Alive & Hermes Gateway
+
+on:
+  schedule:
+    - cron: '*/25 * * * *'  # প্রতি ২৫ মিনিটে রান হবে
+  workflow_dispatch:  # ম্যানুয়ালি ট্রিগার করার অপশন
+
+jobs:
+  keep-alive-and-gateway:
+    runs-on: ubuntu-latest
+    
+    # Hermes Agent ডকার ইমেজ ব্যবহার করব (যেখানে hermes CLI প্রি-ইনস্টলড আছে)
+    container:
+      image: nousresearch/hermes-agent:latest
+      options: --user root
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: ১ম কমান্ড - Keep-Alive Ping (Git Commit & Push)
+        run: |
+          echo "🚀 Running keep-alive ping..."
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "Keep-alive ping ($(date))" && git push origin main
+          echo "✅ Keep-alive ping complete!"
+
+      - name: ২য় কমান্ড - Hermes Gateway Run (Background)
+        run: |
+          echo "🚀 Starting Hermes Gateway in background..."
+          # ডিরেক্টরি তৈরি করে লগ ফাইল রাখব
+          mkdir -p logs
+          # হার্মেস গেটওয়ে ব্যাকগ্রাউন্ডে চালু করব
+          nohup hermes gateway run > logs/hermes_gateway.log 2>&1 &
+          echo "✅ Hermes Gateway started! PID: $!"
+          # কিছুক্ষণ অপেক্ষা করে চেক করব যে প্রসেস চলছে কিনা
+          sleep 10
+          if ps aux | grep -q "[h]ermes gateway"; then
+            echo "✅ Hermes Gateway is running!"
+          else
+            echo "⚠️ Hermes Gateway process not found. Check logs: logs/hermes_gateway.log"
+          fi
+
+      - name: Show Gateway Log (tail)
+        if: always()
+        run: |
+          echo "📋 Latest gateway log:"
+          tail -20 logs/hermes_gateway.log 2>/dev/null || echo "No log file found yet"
