@@ -4,16 +4,23 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '15 * * * *'
+    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর রান হবে
   workflow_dispatch:
 
 jobs:
-  web-ping:
+  wake-codespace:
     runs-on: ubuntu-latest
     steps:
-      - name: Hit Codespace URL
+      - name: Wake up via GitHub CLI
+        env:
+          # গিটহাবের নিজস্ব বিল্ট-ইন টোকেন যা সিকিউরড
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
         run: |
-          echo "🌐 Pinging Codespace Endpoint..."
-          # -L ফ্ল্যাগ যোগ করার ফলে রিডাইরেক্ট হলেও স্ক্রিপ্টটি সফলভাবে রান হবে
-          curl -sL -o /dev/null https://legendary-robot-p7p74pv59vvxh4vq.github.dev/
-          echo "✅ Wake-up signal sent successfully!"
+          echo "🔄 Sending official resume command to codespace..."
+          # এই স্পেসিফিক এপিআই কলটি সরাসরি কোডস্পেস কন্টেইনারকে ওয়েক-আপ করে
+          gh api -X POST /user/codespaces/$CODESPACE_NAME/start || echo "Already running or login required"
+          
+          # সেফটি হিসেবে ওয়েব এন্ডপয়েন্টেও একটা হিট পাঠানো হচ্ছে
+          curl -sL -o /dev/null https://github.dev
+          echo "✅ Keep-alive triggers completed."
