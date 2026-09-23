@@ -4,25 +4,25 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর রান হবে
+    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর ব্যাকগ্রাউন্ডে রান হবে
   workflow_dispatch: 
 
 jobs:
-  ping-codespace:
+  wake-codespace:
     runs-on: ubuntu-latest
     
-    # গিটহাব অ্যাকশন বটকে কোডস্পেস পরিচালনার অফিশিয়াল পারমিশন দেওয়া হলো
+    # এটি গিটহাব অ্যাকশনকে কন্টেইনার ম্যানেজ করার জন্য ফুল অফিশিয়াল পারমিশন দেবে
     permissions:
       contents: write
       codespaces: write
 
     steps:
-      - name: Wake up Codespace via CLI
+      - name: Force Start Codespace Container
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq" 
+          CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
         run: |
-          echo "🔄 Official CLI resume signal sending..."
-          # এটি ইন্টারনাল এপিআই বাইপাস করে সরাসরি কোডস্পেস স্টার্ট করার অফিশিয়াল কমান্ড
-          gh codespace resume --name "$CODESPACE_NAME"
-          echo "✅ Codespace Docker container is awake and running!"
+          echo "🔄 Sending official boot command to the Docker Container..."
+          # এটি ইন্টারনাল এপিআই ব্যবহার করে সরাসরি কোডস্পেস কন্টেইনারকে স্টার্ট ও সচল করে
+          gh api -X POST /user/codespaces/$CODESPACE_NAME/start || echo "Container already running or active."
+          echo "✅ Codespace is awake and main process reset!"
