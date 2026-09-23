@@ -1,11 +1,10 @@
-# NousResearch এর অফিশিয়াল ইমেজ ব্যবহার করা হচ্ছে
 FROM nousresearch/hermes-agent:latest
 
-# আপনার কোডস্পেসের ব্যাকআপ ফাইলগুলো কন্টেইনারে কপি করা হচ্ছে
-COPY ./hermes_backup /opt/data
+# আপনার কোডস্পেসের ব্যাকআপ (যার মধ্যে পোর্টাল লগইন সেশন আছে) কপি করা হচ্ছে
+COPY ./hermes_backup /root/.hermes
 
-# রেলওয়ের জন্য প্রয়োজনীয় এনভায়রনমেন্ট
-ENV HERMES_HOME=/opt/data
+# ডিরেক্টরি পাথ সেট করা হচ্ছে
+ENV HERMES_HOME=/root/.hermes
 
-# গেটওয়ে রান করার মেইন প্রসেস কমান্ড
-CMD ["hermes", "gateway", "run"]
+# পোর্টাল এবং গেটওয়ে একসাথে ২৪/৭ রান করার কমান্ড
+CMD ["hermes", "gateway", "run", "--portal"]
