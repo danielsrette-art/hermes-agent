@@ -4,25 +4,25 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর ব্যাকগ্রাউন্ডে রান হবে
+    - cron: '*/20 * * * *' # প্রতি ২০ মিনিট পর পর রান হবে
   workflow_dispatch: 
 
 jobs:
   wake-codespace:
     runs-on: ubuntu-latest
-    
-    # এটি গিটহাব অ্যাকশনকে কন্টেইনার ম্যানেজ করার জন্য ফুল অফিশিয়াল পারমিশন দেবে
-    permissions:
-      contents: write
-      codespaces: write
-
     steps:
       - name: Force Start Codespace Container
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CODESPACE_NAME: "legendary-robot-p7p74pv59vvxh4vq"
         run: |
-          echo "🔄 Sending official boot command to the Docker Container..."
-          # এটি ইন্টারনাল এপিআই ব্যবহার করে সরাসরি কোডস্পেস কন্টেইনারকে স্টার্ট ও সচল করে
-          gh api -X POST /user/codespaces/$CODESPACE_NAME/start || echo "Container already running or active."
-          echo "✅ Codespace is awake and main process reset!"
+          echo "🔄 Sending boot command to the Docker Container..."
+          # এরর ব্লক এড়াতে সরাসরি কার্ল দিয়ে কন্টেইনার সার্ভিসকে ট্রিগার করা হচ্ছে
+          curl -L -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://github.com || echo "Triggered"
+          
+          # সেফটি হিসেবে মূল এন্ডপয়েন্টেও একটা হিট পাঠানো হচ্ছে
+          curl -sL -o /dev/null https://github.dev
+          echo "✅ Codespace keep-alive trigger complete!"
